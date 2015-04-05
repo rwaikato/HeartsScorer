@@ -1,0 +1,186 @@
+﻿@model ScoreKeeper.ViewModels.GameDetails
+
+@{
+    ViewBag.Title = "StartGame";
+}
+
+<script type="text/javascript">
+    var myApp = angular.module("myApp", []);
+    myApp.factory("items", function () {
+
+        var items = {};
+        items.RoundList = @Html.Raw(Json.Encode(Model.RoundList));
+        items.Players = @Html.Raw(Json.Encode(Model.Players));
+        items.Id = '@Model.Id';
+        items.SelectedEndScore = '@Model.SelectedEndScore';
+        return items;
+    });
+
+    function ItemsController($scope, items, $http) {
+        $scope.items = items;
+
+        $scope.submit = function() {
+            $http.post("/Game/StartGame", items ).error(function (responseData) {
+                console.log("Error !" + responseData);
+            });
+        }
+
+        $scope.deleteItem = function (index) {
+            items.RoundList.splice(index, 1);
+        }
+
+        $scope.addItem = function (index) {
+
+            scores = items.RoundList[$scope.items.RoundList.length-1].GameRoundListItem;
+            angular.forEach( scores, function(value, key){
+                if( value.Score == "")
+                {
+                    scores[key].Score = 0;
+                }
+            });
+
+            var score = [];
+            angular.forEach( items.Players, function(value, key){
+                value.CurrentScore += parseInt( scores[key].Score );
+                score.push({Score: 0})
+            });
+
+            items.RoundList.push({Id: $scope.items.RoundList.length + 1, GameRoundListItem: score});
+
+            var element = "#item" + ( $scope.items.RoundList.length - 1 ).toString( );
+            $(element).find("input").attr("disabled", "disabled");
+
+            var symbol = "#addSymbol" + ($scope.items.RoundList.length - 1).toString();
+            $(symbol).hide();
+        }
+
+        $scope.sumLine = function (index) {
+            var symbol = "#addSymbol" + ($scope.items.RoundList.length).toString();
+            var total = 0;
+            var isShootingTheMoon = false;
+            var triggerSTM = false;
+            var scores = items.RoundList[$scope.items.RoundList.length-1].GameRoundListItem;
+            var isValid = false;
+
+            angular.forEach( scores, function(value, key){
+
+                var valueInt = parseInt(value.Score);
+
+                if ( valueInt != 'NaN' && ( valueInt >= 0 && valueInt <= 26 ) || valueInt == 007){
+
+                    if( valueInt == 007 )
+                    {
+                        triggerSTM = true;
+                    }
+
+                    if( valueInt == 26 )
+                    {
+                        isShootingTheMoon = true;
+                    }
+                    total += valueInt;
+
+                    if( !isValid && valueInt >= 13 )
+                    {
+                        isValid = true;
+                    }
+                }
+                else
+                {
+                    valueInt = 0;
+                    total += 0;
+
+                    if( value.Score != "" )
+                    {
+                        scores[key].Score = 0;
+                    }
+                }
+            });
+
+            if(triggerSTM)
+            {
+                angular.forEach( scores, function(value, key){
+                    var valueInt = parseInt(value.Score);
+
+                    if(valueInt==007)
+                    {
+                        scores[key].Score = 0;
+                    }
+                    else
+                    {
+                        scores[key].Score = 26;
+                    }
+                });
+            }
+
+            if( triggerSTM || ( isValid && ( total == 26 && isShootingTheMoon == false ) || ( total == ( ( items.Players.length - 1 ) * 26 ) && isShootingTheMoon == true ) ) )
+            {
+                $(symbol).show();
+                var finish = false;
+                if( $scope.items.RoundList.length > 4 )
+                {
+                    var playerScoreTotal = 0;
+                    angular.forEach( $scope.items.Players, function(value, key){
+
+                        if( finish == false )
+                        {
+                            angular.forEach( $scope.items.RoundList, function(round, index){
+                            
+                                playerScoreTotal += round.GameRoundListItem[key].Score;
+
+                            if( playerScoreTotal >= $scope.items.SelectedEndScore)
+                            {
+                                $('#submitButton').show();
+                                $(symbol).hide();
+                            }
+                            });
+
+                            playerScoreTotal = 0;
+                        }
+                    });
+                }
+            }
+            else
+            {
+                $(symbol).hide();
+            }
+        }
+
+        $scope.defaultEmptyCells = function (index) {
+            angular.forEach( items.RoundList[index].GameRoundListItem, function(value, key){
+                if (value == "") {
+                    value = 0;
+                }
+            });
+        }
+    }
+</script>
+
+<div ng-app="myApp" ng-controller="ItemsController">
+
+    <br />
+    <div class="clear"></div>
+    <br />
+
+    <table class="table nav" style="width:100%">
+        <tr>
+            <th ng-repeat="item in items.Players"> {{ item.Name }}</th>
+            <th style="text-align: right; width: 35px;"></th>
+        </tr>
+        <tr ng-repeat="item in items.RoundList" id="item{{item.Id}}">
+            <td ng-repeat="cell in item.GameRoundListItem">
+                <input ng-blur="defaultEmptyCells($parent.$index)" ng-change="sumLine($parent.$index)" type="text" name="Score" ng-model="cell.Score" class="form-control" />
+            </td>
+            <td style="text-align: right; width: 35px;">
+                <div ng-click="addItem($index)"><span style="display:none" class="glyphicon glyphicon-plus" aria-hidden="true" id="addSymbol{{item.Id}}"></span></div>
+            </td>
+        </tr>
+        <tr>
+            <td ng-repeat="cell in items.Players">
+                {{cell.CurrentScore}}
+            </td>
+            <td></td>
+        </tr>
+    </table>
+
+    <div style="display:none" ng-click="submit()" class="btn btn-default" id="submitButton">Submit</div>
+</div>

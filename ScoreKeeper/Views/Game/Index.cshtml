@@ -1,0 +1,41 @@
+﻿@model IEnumerable<ScoreKeeper.Models.Game>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+@Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-success pull-right" })
+
+<h2>Index</h2>
+
+
+   
+
+<table class="table table-hover">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.DatePlayed)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.MaxScore)
+        </th>
+        <th style="text-align: right">
+            @Html.DisplayNameFor(model => model.IsComplete)
+        </th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.DatePlayed)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.MaxScore)
+        </td>
+        <td style="text-align: right">
+            @Html.DisplayFor(modelItem => item.IsComplete)
+        </td>
+    </tr>
+}
+
+</table>

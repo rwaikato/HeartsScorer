@@ -1,0 +1,62 @@
+﻿@model ScoreKeeper.ViewModels.GameDetails
+
+@{
+    ViewBag.Title = "Create";
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("select").imagepicker();
+        var arr = [];
+
+        @if( Model.SelectedPlayerIds != null )
+        { 
+            foreach ( var p in Model.SelectedPlayerIds )
+            {
+                <text> arr.push('@p.ToString( )') </text>
+            }
+        }
+
+        $.each(arr, function (index, value) {
+            var elementName = "#playerSelect_" + value;
+            var $element = $(elementName);
+            $element.selected = true;
+        });
+    });
+
+</script>
+
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <hr />
+        @Html.ValidationSummary(true)
+
+        <select class="image-picker show-html" name="SelectedEndScore">
+            <option data-img-src="/Content/EndScoreImages/endscoreImage25.png" value="25">25</option>
+            <option data-img-src="/Content/EndScoreImages/endscoreImage50.png" value="50" selected="selected">50</option>
+            <option data-img-src="/Content/EndScoreImages/endscoreImage75.png" value="75">75</option>
+            <option data-img-src="/Content/EndScoreImages/endscoreImage100.png" value="100">100</option>
+        </select>
+
+        <select id="playerSelect" multiple="multiple" class="image-picker show-html" name="SelectedPlayerIds">
+            @foreach (var p in Model.Players)
+            {
+                <option id="playerSelect_@p.Id.ToString()" data-img-src="@p.ImagePath" value="@p.Id">@p.Name</option>
+            }
+        </select>
+
+        <hr />
+    <div class="form-group">
+        <div class="col-md-10">
+            @Html.ActionLink( "No Interest", "Index", null, new { @class = "btn btn-default pull-right" } )
+            <input type="submit" value="Lets Go!!" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+}  
+
+
+

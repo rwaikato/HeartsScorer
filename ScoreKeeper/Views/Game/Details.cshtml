@@ -1,0 +1,42 @@
+﻿@model ScoreKeeper.Models.Game
+
+@{
+    ViewBag.Title = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Game</h4>
+	<hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.DatePlayed)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DatePlayed)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MaxScore)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MaxScore)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.IsComplete)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.IsComplete)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.GameID }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
