@@ -10,8 +10,10 @@ using ScoreKeeper.Models;
 using ScoreKeeper.Dal;
 using ScoreKeeper.ViewModels;
 
+ 
 namespace ScoreKeeper.Controllers
 {
+	[Authorize]
 	public class GameController : Controller
 	{
 		private ScoreKeeperContext db = new ScoreKeeperContext( );
